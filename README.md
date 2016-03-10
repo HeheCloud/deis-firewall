@@ -7,7 +7,7 @@ Please add any [issues](https://github.com/HeheCloud/deis-firewall/issues) you f
 ## Usage
 
 ```
-wating...
+curl -sSL "https://raw.githubusercontent.com/HeheCloud/deis-firewall/master/firewall.sh" | NEW_NODE=<new node ip> sh -s
 ```
 
 
