@@ -1,0 +1,16 @@
+[Unit]
+Description=Deis firewall
+Documentation=https://github.com/HeheCloud/deis-firewall
+Requires=etcd2.service fleet.service flanneld.service
+After=etcd2.service fleet.service flanneld.service
+Before=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/sh -c 'curl -sSL --retry 5 --retry-delay 2 http://cdn.sinacloud.net/hehe/firewall/firewall-general.sh | sh -s'
+
+[Install]
+WantedBy=multi-user.target
+
+[X-Fleet]
+Global=true

@@ -1,5 +1,6 @@
 #!/bin/env bash
 
+# exit 0
 echo "Creating firewall Rules..."
 # Firewall Template
 template=$(cat <<EOF
@@ -29,6 +30,8 @@ template=$(cat <<EOF
 
 # Allow connections from docker container
 -A Firewall-INPUT -i docker0 -j ACCEPT
+-A Firewall-INPUT -i veth+ -j ACCEPT
+-A Firewall-INPUT -i flannel+ -j ACCEPT
 
 # Accept ssh, http, https and git
 -A Firewall-INPUT -m conntrack --ctstate NEW -m multiport -p tcp --dports 22,2222,80,443,8080,10080 -j ACCEPT
