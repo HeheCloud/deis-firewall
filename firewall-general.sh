@@ -10,7 +10,12 @@ template=$(cat <<EOF
 :FORWARD DROP [0:0]
 :OUTPUT ACCEPT [0:0]
 :Firewall-INPUT - [0:0]
+:DOCKER - [0:0]
 -A INPUT -j Firewall-INPUT
+-A FORWARD -o docker0 -j DOCKER
+-A FORWARD -o docker0 -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+-A FORWARD -i docker0 ! -o docker0 -j ACCEPT
+-A FORWARD -i docker0 -o docker0 -j ACCEPT
 -A FORWARD -j Firewall-INPUT
 -A Firewall-INPUT -i lo -j ACCEPT
 -A Firewall-INPUT -p icmp --icmp-type echo-reply -j ACCEPT
@@ -30,8 +35,9 @@ template=$(cat <<EOF
 
 # Allow connections from docker container
 -A Firewall-INPUT -i docker0 -j ACCEPT
-# -A Firewall-INPUT -i veth+ -j ACCEPT
-# -A Firewall-INPUT -i flannel+ -j ACCEPT
+-A Firewall-INPUT -i eth+ -j ACCEPT
+-A Firewall-INPUT -i veth+ -j ACCEPT
+-A Firewall-INPUT -i flannel+ -j ACCEPT
 
 # Accept ssh, http, https and git
 -A Firewall-INPUT -m conntrack --ctstate NEW -m multiport -p tcp --dports 22,2222,80,443,8080,10080 -j ACCEPT
