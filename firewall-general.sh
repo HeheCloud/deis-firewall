@@ -6,16 +6,12 @@ echo "Creating firewall Rules..."
 template=$(cat <<EOF
 *filter
 
+
 :INPUT DROP [0:0]
-:FORWARD DROP [0:0]
+:FORWARD ACCEPT [0:0]
 :OUTPUT ACCEPT [0:0]
 :Firewall-INPUT - [0:0]
-:DOCKER - [0:0]
 -A INPUT -j Firewall-INPUT
--A FORWARD -o docker0 -j DOCKER
--A FORWARD -o docker0 -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
--A FORWARD -i docker0 ! -o docker0 -j ACCEPT
--A FORWARD -i docker0 -o docker0 -j ACCEPT
 -A FORWARD -j Firewall-INPUT
 -A Firewall-INPUT -i lo -j ACCEPT
 -A Firewall-INPUT -p icmp --icmp-type echo-reply -j ACCEPT
@@ -35,9 +31,10 @@ template=$(cat <<EOF
 
 # Allow connections from docker container
 -A Firewall-INPUT -i docker0 -j ACCEPT
--A Firewall-INPUT -i eth+ -j ACCEPT
--A Firewall-INPUT -i veth+ -j ACCEPT
--A Firewall-INPUT -i flannel+ -j ACCEPT
+-A Firewall-INPUT -o docker0 -j ACCEPT
+# -A Firewall-INPUT -i eth+ -j ACCEPT
+# -A Firewall-INPUT -i veth+ -j ACCEPT
+# -A Firewall-INPUT -i flannel+ -j ACCEPT
 
 # Accept ssh, http, https and git
 -A Firewall-INPUT -m conntrack --ctstate NEW -m multiport -p tcp --dports 22,2222,80,443,8080,10080 -j ACCEPT
@@ -45,6 +42,13 @@ template=$(cat <<EOF
 # Log and drop everything else
 -A Firewall-INPUT -j LOG
 -A Firewall-INPUT -j REJECT
+
+
+:DOCKER - [0:0]
+-A FORWARD -o docker0 -j DOCKER
+-A FORWARD -o docker0 -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+-A FORWARD -i docker0 ! -o docker0 -j ACCEPT
+-A FORWARD -i docker0 -o docker0 -j ACCEPT
 
 COMMIT
 EOF
@@ -61,6 +65,7 @@ echo "Enabling iptables service"
 sudo systemctl enable iptables-restore.service
 
 # Flush custom rules before the restore (so this script is idempotent)
+sudo /usr/sbin/iptables -F DOCKER 2> /dev/null
 sudo /usr/sbin/iptables -F Firewall-INPUT 2> /dev/null
 
 echo "Loading custom iptables firewall"
