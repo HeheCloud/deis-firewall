@@ -8,7 +8,7 @@ template=$(cat <<EOF
 
 
 :INPUT DROP [0:0]
-:FORWARD ACCEPT [0:0]
+:FORWARD DROP [0:0]
 :OUTPUT ACCEPT [0:0]
 :Firewall-INPUT - [0:0]
 -A INPUT -j Firewall-INPUT
@@ -28,6 +28,8 @@ template=$(cat <<EOF
 -A Firewall-INPUT -s 10.0.0.0/8 -j ACCEPT
 -A Firewall-INPUT -s 172.16.0.0/12 -j ACCEPT
 -A Firewall-INPUT -s 192.168.0.0/16 -j ACCEPT
+-A Firewall-INPUT -s 240.0.0.0/5 -j ACCEPT
+-A Firewall-INPUT -s 224.0.0.0/4 -j ACCEPT
 
 # Allow connections from docker container
 -A Firewall-INPUT -i docker0 -j ACCEPT
