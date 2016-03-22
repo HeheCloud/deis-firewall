@@ -8,7 +8,7 @@ template=$(cat <<EOF
 
 
 :INPUT DROP [0:0]
-:FORWARD ACCEPT [0:0]
+:FORWARD DROP [0:0]
 :OUTPUT ACCEPT [0:0]
 :Firewall-INPUT - [0:0]
 -A INPUT -j Firewall-INPUT
